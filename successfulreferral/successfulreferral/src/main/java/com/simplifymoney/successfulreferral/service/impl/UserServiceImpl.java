@@ -15,9 +15,14 @@ import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
+
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Retrieves all users referred by a specific referrer.
+     * Marks referrals as successful only if both referrer and referred user have completed their profiles.
+     */
     @Override
     public List<UserDTO> getReferrals(Long userId) {
         User referrer = userRepository.findById(userId)
@@ -29,17 +34,16 @@ public class UserServiceImpl implements UserService {
                 .map(user -> {
                     UserDTO dto = UserMapper.toDTO(user);
                     dto.setProfileComplete(user.isProfileComplete());
-
-                    // ✅ Referral is successful only if BOTH profiles are complete
                     dto.setReferralComplete(user.isReferralComplete());
-
                     return dto;
                 })
                 .toList();
     }
 
-
-
+    /**
+     * Handles user signup, generates a unique referral code, and links the referrer if the referral code is valid.
+     * Prevents using a referral code if the referrer has not completed their profile.
+     */
     @Override
     public UserDTO signup(String name, String email, String password, String referralCode) {
         User user = new User();
@@ -48,7 +52,6 @@ public class UserServiceImpl implements UserService {
         user.setPassword(password);
         user.setReferralCode(generateReferralCode());
 
-        // ✅ Prevent referral usage if referrer has not completed their profile
         if (referralCode != null && !referralCode.isEmpty()) {
             Optional<User> referrerOpt = userRepository.findByReferralCode(referralCode);
             if (referrerOpt.isPresent()) {
@@ -57,7 +60,6 @@ public class UserServiceImpl implements UserService {
                 if (!referrer.isProfileComplete()) {
                     throw new RuntimeException("Referral code cannot be used as the referrer has not completed their profile.");
                 }
-
                 user.setReferrer(referrer);
             } else {
                 throw new RuntimeException("Invalid referral code");
@@ -68,8 +70,10 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toDTO(savedUser);
     }
 
-
-
+    /**
+     * Marks a user's profile as complete and updates referral status accordingly.
+     * If both the referred user and referrer have completed profiles, marks the referral as successful.
+     */
     @Override
     public void completeProfile(Long userId) {
         User user = userRepository.findById(userId)
@@ -78,11 +82,9 @@ public class UserServiceImpl implements UserService {
         user.setProfileComplete(true);
         userRepository.save(user);
 
-        // ✅ Check if the user was referred by someone
+        // Check if this user was referred by someone
         if (user.getReferrer() != null) {
             User referrer = user.getReferrer();
-
-            // ✅ If both referrer & referred user have completed profiles, mark referral as complete
             if (referrer.isProfileComplete() && user.isProfileComplete()) {
                 user.setReferralComplete(true);
                 userRepository.save(user);
@@ -90,7 +92,7 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        // ✅ Now check if this user has referred others
+        // Check if this user has referred others
         List<User> referredUsers = userRepository.findByReferrer(user);
         for (User referredUser : referredUsers) {
             if (referredUser.isProfileComplete() && user.isProfileComplete()) {
@@ -101,10 +103,12 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * Generates a CSV report of all user referrals, including referrer details, referred users, and referral status.
+     */
     @Override
     public void generateReferralReport(PrintWriter writer) {
         List<User> users = userRepository.findAll();
-
         writer.println("Referrer Name,Referred Name,Referred Email,Referral Status");
 
         for (User referredUser : users) {
@@ -119,17 +123,25 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
+    /**
+     * Finds a user by email and returns a DTO.
+     */
     @Override
     public Optional<UserDTO> findByEmail(String email) {
         return userRepository.findByEmail(email).map(UserMapper::toDTO);
     }
 
+    /**
+     * Finds a user by referral code and returns a DTO.
+     */
     @Override
     public Optional<UserDTO> findByReferralCode(String referralCode) {
         return userRepository.findByReferralCode(referralCode).map(UserMapper::toDTO);
     }
 
+    /**
+     * Generates a unique referral code for each user.
+     */
     private String generateReferralCode() {
         return UUID.randomUUID().toString().substring(0, 8);
     }

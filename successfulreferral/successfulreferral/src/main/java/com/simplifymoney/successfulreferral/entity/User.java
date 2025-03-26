@@ -2,6 +2,9 @@ package com.simplifymoney.successfulreferral.entity;
 
 import jakarta.persistence.*;
 
+/**
+ * Represents a user in the referral system, including referral tracking.
+ */
 @Entity
 @Table(name = "users")
 public class User {
@@ -16,20 +19,20 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private String password; // Storing as plain text for simplicity
+    private String password; // Stored as plain text
 
     @Column(nullable = false, unique = true, length = 10)
-    private String referralCode;
+    private String referralCode; // Unique referral code assigned to each user
 
     @ManyToOne
     @JoinColumn(name = "referrer_id")
-    private User referrer; // Self-referencing for tracking referrals
+    private User referrer; // Self-referencing field to track referrals
 
     @Column(nullable = false)
-    private boolean profileComplete = false;
+    private boolean profileComplete = false; // Indicates if the user has completed their profile
 
     @Column(nullable = false)
-    private boolean referralComplete = false;
+    private boolean referralComplete = false; // Indicates if the referral is considered successful
 
     // Default Constructor
     public User() {}
@@ -46,70 +49,28 @@ public class User {
         this.referralComplete = referralComplete;
     }
 
-
-
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getName() {
-        return name;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getReferralCode() { return referralCode; }
+    public void setReferralCode(String referralCode) { this.referralCode = referralCode; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public User getReferrer() { return referrer; }
+    public void setReferrer(User referrer) { this.referrer = referrer; }
 
-    public String getPassword() {
-        return password;
-    }
+    public boolean isProfileComplete() { return profileComplete; }
+    public void setProfileComplete(boolean profileComplete) { this.profileComplete = profileComplete; }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getReferralCode() {
-        return referralCode;
-    }
-
-    public void setReferralCode(String referralCode) {
-        this.referralCode = referralCode;
-    }
-
-    public User getReferrer() {
-        return referrer;
-    }
-
-    public boolean isReferralComplete() {
-        return referralComplete;
-    }
-
-    public void setReferrer(User referrer) {
-        this.referrer = referrer;
-    }
-
-    public void setReferralComplete(boolean referralComplete) {
-        this.referralComplete = referralComplete;
-    }
-
-    public boolean isProfileComplete() {
-        return profileComplete;
-    }
-
-    public void setProfileComplete(boolean profileComplete) {
-        this.profileComplete = profileComplete;
-    }
+    public boolean isReferralComplete() { return referralComplete; }
+    public void setReferralComplete(boolean referralComplete) { this.referralComplete = referralComplete; }
 }

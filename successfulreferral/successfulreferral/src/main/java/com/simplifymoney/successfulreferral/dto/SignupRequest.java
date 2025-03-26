@@ -1,15 +1,18 @@
 package com.simplifymoney.successfulreferral.dto;
 
+/**
+ * Represents a user signup request, including optional referral code.
+ */
 public class SignupRequest {
     private String name;
     private String email;
     private String password;
     private String referralCode;
 
-    // Default Constructor
+    // Default constructor for serialization
     public SignupRequest() {}
 
-    // Parameterized Constructor (Optional)
+    // Constructor to initialize all fields
     public SignupRequest(String name, String email, String password, String referralCode) {
         this.name = name;
         this.email = email;
@@ -30,7 +33,7 @@ public class SignupRequest {
     public String getReferralCode() { return referralCode; }
     public void setReferralCode(String referralCode) { this.referralCode = referralCode; }
 
-    // toString() for debugging (Optional)
+    // Debugging utility
     @Override
     public String toString() {
         return "SignupRequest{name='" + name + "', email='" + email + "', password='" + password + "', referralCode='" + referralCode + "'}";
